@@ -1,0 +1,248 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
+import { Thermometer } from "lucide-react"
+
+// Temperature conversion functions
+function celsiusToFahrenheit(celsius: number): number {
+  return (celsius * 9) / 5 + 32
+}
+
+function celsiusToKelvin(celsius: number): number {
+  return celsius + 273.15
+}
+
+function fahrenheitToCelsius(fahrenheit: number): number {
+  return ((fahrenheit - 32) * 5) / 9
+}
+
+function fahrenheitToKelvin(fahrenheit: number): number {
+  return ((fahrenheit - 32) * 5) / 9 + 273.15
+}
+
+function kelvinToCelsius(kelvin: number): number {
+  return kelvin - 273.15
+}
+
+function kelvinToFahrenheit(kelvin: number): number {
+  return ((kelvin - 273.15) * 9) / 5 + 32
+}
+
+interface ConversionResult {
+  celsius: number
+  fahrenheit: number
+  kelvin: number
+}
+
+export default function TemperatureConverter() {
+  const [temperature, setTemperature] = useState<string>("")
+  const [unit, setUnit] = useState<string>("C")
+  const [results, setResults] = useState<ConversionResult | null>(null)
+  const [error, setError] = useState<string>("")
+
+  useEffect(() => {
+    if (temperature === "") {
+      setResults(null)
+      setError("")
+      return
+    }
+
+    const tempValue = Number.parseFloat(temperature)
+
+    if (isNaN(tempValue)) {
+      setError("Please enter a valid number")
+      setResults(null)
+      return
+    }
+
+    setError("")
+
+    let celsius: number, fahrenheit: number, kelvin: number
+
+    switch (unit) {
+      case "C":
+        celsius = tempValue
+        fahrenheit = celsiusToFahrenheit(tempValue)
+        kelvin = celsiusToKelvin(tempValue)
+        break
+      case "F":
+        celsius = fahrenheitToCelsius(tempValue)
+        fahrenheit = tempValue
+        kelvin = fahrenheitToKelvin(tempValue)
+        break
+      case "K":
+        celsius = kelvinToCelsius(tempValue)
+        fahrenheit = kelvinToFahrenheit(tempValue)
+        kelvin = tempValue
+        break
+      default:
+        return
+    }
+
+    setResults({ celsius, fahrenheit, kelvin })
+  }, [temperature, unit])
+
+  const formatTemperature = (temp: number, unit: string): string => {
+    return `${temp.toFixed(2)}°${unit === "K" ? "" : ""}${unit}`
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+      <div className="mx-auto max-w-4xl space-y-8">
+        {/* Header */}
+        <div className="text-center space-y-4 pt-8">
+          <div className="flex items-center justify-center gap-2">
+            <Thermometer className="h-8 w-8 text-blue-600" />
+            <h1 className="text-4xl font-bold text-gray-900">Temperature Converter</h1>
+          </div>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Convert temperatures between Celsius, Fahrenheit, and Kelvin with precision and ease
+          </p>
+        </div>
+
+        {/* Main Converter */}
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Thermometer className="h-5 w-5" />
+              Temperature Input
+            </CardTitle>
+            <CardDescription>Enter a temperature value and select its unit to see conversions</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="temperature">Temperature Value</Label>
+                <Input
+                  id="temperature"
+                  type="number"
+                  placeholder="Enter temperature..."
+                  value={temperature}
+                  onChange={(e) => setTemperature(e.target.value)}
+                  className="text-lg"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="unit">Unit</Label>
+                <Select value={unit} onValueChange={setUnit}>
+                  <SelectTrigger id="unit" className="text-lg">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="C">Celsius (°C)</SelectItem>
+                    <SelectItem value="F">Fahrenheit (°F)</SelectItem>
+                    <SelectItem value="K">Kelvin (K)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {error && (
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-red-600 font-medium">{error}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Results */}
+        {results && !error && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card className={`shadow-md transition-all ${unit === "C" ? "ring-2 ring-blue-500 bg-blue-50" : ""}`}>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center justify-between">
+                  Celsius
+                  {unit === "C" && <Badge variant="secondary">Input</Badge>}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-blue-600">{formatTemperature(results.celsius, "C")}</div>
+                <p className="text-sm text-gray-500 mt-2">Water freezes at 0°C, boils at 100°C</p>
+              </CardContent>
+            </Card>
+
+            <Card className={`shadow-md transition-all ${unit === "F" ? "ring-2 ring-orange-500 bg-orange-50" : ""}`}>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center justify-between">
+                  Fahrenheit
+                  {unit === "F" && <Badge variant="secondary">Input</Badge>}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-orange-600">{formatTemperature(results.fahrenheit, "F")}</div>
+                <p className="text-sm text-gray-500 mt-2">Water freezes at 32°F, boils at 212°F</p>
+              </CardContent>
+            </Card>
+
+            <Card className={`shadow-md transition-all ${unit === "K" ? "ring-2 ring-purple-500 bg-purple-50" : ""}`}>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center justify-between">
+                  Kelvin
+                  {unit === "K" && <Badge variant="secondary">Input</Badge>}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-purple-600">{formatTemperature(results.kelvin, "K")}</div>
+                <p className="text-sm text-gray-500 mt-2">Absolute zero at 0K, water freezes at 273.15K</p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Information Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Temperature Scales</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                <div>
+                  <p className="font-medium">Celsius (°C)</p>
+                  <p className="text-sm text-gray-600">Based on water's freezing (0°) and boiling (100°) points</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                <div>
+                  <p className="font-medium">Fahrenheit (°F)</p>
+                  <p className="text-sm text-gray-600">Commonly used in the United States</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                <div>
+                  <p className="font-medium">Kelvin (K)</p>
+                  <p className="text-sm text-gray-600">Absolute temperature scale used in science</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Quick Reference</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="space-y-2">
+                <p className="font-medium">Common Temperatures:</p>
+                <div className="text-sm space-y-1">
+                  <p>• Room temperature: ~20°C / 68°F / 293K</p>
+                  <p>• Body temperature: 37°C / 98.6°F / 310K</p>
+                  <p>• Water boiling: 100°C / 212°F / 373K</p>
+                  <p>• Water freezing: 0°C / 32°F / 273K</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  )
+}
