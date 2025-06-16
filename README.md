@@ -12,4 +12,4 @@ Convert Temperature - Input Temperature Value - Select Original Unit (Celsius, F
 >  Fahrenheit to Celsius and Kelvin.
 >  Kelvin to Celsius and Fahrenheit.
 # Output
-![image alt](https://github.com/kshitiz-star/prodigy-infotech-1/commit/eb810c59c938223c1f1a7522fa494f513bea39e6#diff-f7db5f7bb8c3b516e69213d5b82423878b8aabfc4537b83ac3912649d3fee476)
+![image alt](https://github.com/kshitiz-star/prodigy-infotech-1/blob/main/Screenshot%202025-06-14%20105019.png?raw=true)
